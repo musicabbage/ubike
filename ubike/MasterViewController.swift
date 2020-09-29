@@ -8,7 +8,7 @@
 
 import UIKit
 
-class MasterViewController: UITableViewController {
+class TableViewController: UITableViewController {
 
     var detailViewController: DetailViewController? = nil
     var objects = [Any]()
