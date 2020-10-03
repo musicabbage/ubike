@@ -12,7 +12,6 @@ import RxSwift
 class TableViewController: UITableViewController {
 
     var detailViewController: DetailViewController? = nil
-//    var objects = [Any]()
 
     private let bag = DisposeBag()
     
@@ -70,18 +69,10 @@ class TableViewController: UITableViewController {
         guard let spots = spots?[sections[section]] else { return 0 }
         
         return spots.count
-//        let sectionName = sections[section]
-        //let spots = spots[sectionName].c
-//        return spots[sectionName]!.count//spots[sectio]!.count
-//        return spots[].count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        //let object = objects[indexPath.row] as! NSDate
-//        let spot =
-//        cell.textLabel!.text = object.description
-//        return cell
         guard let spots = spots?[sections[indexPath.section]] else { return cell }
         
         let spot = spots[indexPath.row]

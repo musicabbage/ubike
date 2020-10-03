@@ -12,7 +12,6 @@ import RxCocoa
 
 class UBikeViewModel {
     private static let API = "https://tcgbusfs.blob.core.windows.net/blobyoubike/YouBikeTP.gz"
-    
     private static let allSpots = BehaviorRelay<[String: [Spot]]>(value: [:])
     
     static let spotsDriver = UBikeViewModel.allSpots.share(replay: 1, scope: .whileConnected).asDriver(onErrorJustReturn: [:])
@@ -41,19 +40,6 @@ class UBikeViewModel {
             .subscribe(onNext: { (spots) in
                 self.allSpots.accept(spots)
             })
-        
-            
-//            .sha
-//            .groupBy(keySelector: { (element) -> [String: Spot] in
-//                return element.sarea
-//            })
-//            .reduce([Spot](), accumulator: { (spots, element) -> [Spot] in
-//                return spots + element
-//            }, mapResult: { (e) -> [String: Spot] in
-//
-//            })
-//            .catchErrorJustReturn([:])
-//            .catchErrorJustReturn([])
     }
     
     //MARK: private
