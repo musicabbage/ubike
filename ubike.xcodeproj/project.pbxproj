@@ -18,6 +18,8 @@
 		8B4AE84625198AC90049E772 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4AE84525198AC90049E772 /* MapViewController.swift */; };
 		8B4AE84A25198C6B0049E772 /* UBikeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4AE84925198C6B0049E772 /* UBikeViewModel.swift */; };
 		8B4AE84C25198F1A0049E772 /* UBikeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4AE84B25198F1A0049E772 /* UBikeModel.swift */; };
+		8B941AAA2529C9D50073E935 /* SpotTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B941AA92529C9D50073E935 /* SpotTableViewCell.swift */; };
+		8B941AAD2529D4750073E935 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B941AAC2529D4750073E935 /* Colors.swift */; };
 		8BD1E290251ED86E0040AC92 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD1E28F251ED86E0040AC92 /* MainViewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -35,6 +37,8 @@
 		8B4AE84525198AC90049E772 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		8B4AE84925198C6B0049E772 /* UBikeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UBikeViewModel.swift; sourceTree = "<group>"; };
 		8B4AE84B25198F1A0049E772 /* UBikeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UBikeModel.swift; sourceTree = "<group>"; };
+		8B941AA92529C9D50073E935 /* SpotTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotTableViewCell.swift; sourceTree = "<group>"; };
+		8B941AAC2529D4750073E935 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		8BD1E28F251ED86E0040AC92 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		A89A77610E0F9D14F54839EE /* Pods-ubike.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ubike.debug.xcconfig"; path = "Target Support Files/Pods-ubike/Pods-ubike.debug.xcconfig"; sourceTree = "<group>"; };
 		B22387DB3BADF996A3C2BCAE /* Pods-ubike.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ubike.release.xcconfig"; path = "Target Support Files/Pods-ubike/Pods-ubike.release.xcconfig"; sourceTree = "<group>"; };
@@ -79,6 +83,8 @@
 				8B4AE84525198AC90049E772 /* MapViewController.swift */,
 				8B4AE833251988F30049E772 /* TableViewController.swift */,
 				8B4AE835251988F30049E772 /* DetailViewController.swift */,
+				8B941AAB2529D4620073E935 /* Common */,
+				8B941AA82529C9C10073E935 /* Views */,
 				8B4AE84725198BAA0049E772 /* ViewModel */,
 				8B4AE84825198BC80049E772 /* DataModel */,
 				8B4AE837251988F30049E772 /* Main.storyboard */,
@@ -103,6 +109,22 @@
 				8B4AE84B25198F1A0049E772 /* UBikeModel.swift */,
 			);
 			path = DataModel;
+			sourceTree = "<group>";
+		};
+		8B941AA82529C9C10073E935 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				8B941AA92529C9D50073E935 /* SpotTableViewCell.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		8B941AAB2529D4620073E935 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				8B941AAC2529D4750073E935 /* Colors.swift */,
+			);
+			path = Common;
 			sourceTree = "<group>";
 		};
 		95617D7977A57A058EFB9115 /* Frameworks */ = {
@@ -238,8 +260,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				8B4AE830251988F30049E772 /* AppDelegate.swift in Sources */,
+				8B941AAD2529D4750073E935 /* Colors.swift in Sources */,
 				8B4AE832251988F30049E772 /* SceneDelegate.swift in Sources */,
 				8B4AE834251988F30049E772 /* TableViewController.swift in Sources */,
+				8B941AAA2529C9D50073E935 /* SpotTableViewCell.swift in Sources */,
 				8B4AE84C25198F1A0049E772 /* UBikeModel.swift in Sources */,
 				8B4AE84A25198C6B0049E772 /* UBikeViewModel.swift in Sources */,
 				8B4AE84625198AC90049E772 /* MapViewController.swift in Sources */,

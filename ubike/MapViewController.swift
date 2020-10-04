@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import RxSwift
 import MapKit
 
 class MapViewController: UIViewController {
@@ -16,11 +17,17 @@ class MapViewController: UIViewController {
     private let kAnnotationIdentifier = "annotation"
     private let kClusterIdentifier = "cluster"
     
+    private let locationManager = CLLocationManager()
+    private let bag = DisposeBag()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        LocationViewModel.refreshCurrentLocation()
         setupMapView()
         
-        _ = UBikeViewModel.spotsDriver.map { (result) -> [MKAnnotation] in
+        
+        UBikeViewModel.spotsDriver.map { (result) -> [MKAnnotation] in
             result.reduce([Spot]()) { (result, spots) -> [Spot] in
                 return result + spots.value
             }
@@ -32,11 +39,20 @@ class MapViewController: UIViewController {
         .drive(onNext: { [weak self] (annotations) in
             self?.mapview.addAnnotations(annotations)
         })
+            .disposed(by: bag)
+        
+        LocationViewModel.locationDriver.drive(onNext: { [weak self] (location) in
+            self?.mapview.centerToLocation(location, regionRadius: 5000)
+        })
+        .disposed(by: bag)
+        
     }
     
     private func setupMapView() {
-        let initialLocation = CLLocation(latitude: 25.03, longitude: 121.3)
-        mapview.centerToLocation(initialLocation)
+        
+        
+        
+        
         mapview.delegate = self
     }
     
@@ -61,13 +77,17 @@ class MapViewController: UIViewController {
                 defer {
                     switch availableBikes {
                     case .some(0):
-                        markerTintColor = .lightGray
+                        markerTintColor = .light()
+                        glyphTintColor = .lightGray
                     case .some(1..<10):
-                        markerTintColor = .orange
+                        markerTintColor = .orange()
+                        glyphTintColor = .textPurple()
                     case .some(10...):
-                        markerTintColor = .green
+                        markerTintColor = .green()
+                        glyphTintColor = .white
                     default:
-                        markerTintColor = .systemPink
+                        markerTintColor = .alert()
+                        glyphTintColor = .white
                     }
                 }
                 
