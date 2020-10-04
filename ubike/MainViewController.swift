@@ -23,6 +23,14 @@ class MainViewController: UIViewController {
     }()
     
     private let tableContainer = UIView()
+    private let dismissButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.backgroundColor = .white
+        button.setTitleColor(.systemBlue, for: .normal)
+        button.setTitle("↓", for: .normal)
+        button.setTitle("↑", for: .selected)
+        return button
+    }()
     private let tableViewController: TableViewController = {
         let storyboard = UIStoryboard(name: "Main", bundle: .main)
         let tableViewController = storyboard.instantiateViewController(withIdentifier: "TableViewController") as! TableViewController
@@ -33,6 +41,7 @@ class MainViewController: UIViewController {
         super.viewDidLoad()
 
         setupSubViewControllers()
+        bindSubviews()
         
         UBikeViewModel.fetch()            
     }
@@ -43,11 +52,6 @@ class MainViewController: UIViewController {
         mapViewController.didMove(toParent: self)
         mapViewController.view.snp.makeConstraints({ $0.top.bottom.left.right.equalToSuperview() })
         
-        let dismissButton = UIButton(type: .custom)
-        dismissButton.backgroundColor = .white
-        dismissButton.setTitleColor(.systemBlue, for: .normal)
-        dismissButton.setTitle("↓", for: .normal)
-        dismissButton.setTitle("↑", for: .selected)
         dismissButton.addTarget(self, action: #selector(dismissTable(_:)), for: .touchUpInside)
         tableContainer.addSubview(dismissButton)
         dismissButton.snp.makeConstraints { (make) in
@@ -67,6 +71,17 @@ class MainViewController: UIViewController {
             make.top.equalTo(dismissButton.snp.bottom)
             make.left.right.bottom.equalToSuperview()
         }
+    }
+    
+    private func bindSubviews() {
+        tableViewController.selectSpotDriver.drive(onNext: { [weak self] (spot) in
+            guard let spot = spot, let center = spot.coordinate else { return }
+            self?.mapViewController.mapview.setCenter(center, animated: true)
+            if let button = self?.dismissButton, button.isSelected == false {
+                self?.dismissTable(button)
+            }
+        })
+        .disposed(by: bag)
     }
  
     @objc private func dismissTable(_ sender: UIButton) {

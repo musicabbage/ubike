@@ -17,6 +17,7 @@ class MapViewController: UIViewController {
     private let kAnnotationIdentifier = "annotation"
     private let kClusterIdentifier = "cluster"
     
+    private let kDefaultLocation = CLLocation(latitude: 25.03, longitude: 121.3)
     private let locationManager = CLLocationManager()
     private let bag = DisposeBag()
     
@@ -27,32 +28,33 @@ class MapViewController: UIViewController {
         setupMapView()
         
         
-        UBikeViewModel.spotsDriver.map { (result) -> [MKAnnotation] in
-            result.reduce([Spot]()) { (result, spots) -> [Spot] in
-                return result + spots.value
-            }
-            .map { (spot) -> MKAnnotation in
-                let annotation = SpotAnnotation(spot)
-                return annotation
-            }
+        UBikeViewModel.spotsDriver
+            .map { (result) -> [MKAnnotation] in
+                result.reduce([Spot]()) { (result, spots) -> [Spot] in
+                    return result + spots.value
+                }
+                .map { (spot) -> MKAnnotation in
+                    let annotation = SpotAnnotation(spot)
+                    return annotation
+                }
         }
         .drive(onNext: { [weak self] (annotations) in
             self?.mapview.addAnnotations(annotations)
         })
             .disposed(by: bag)
         
-        LocationViewModel.locationDriver.drive(onNext: { [weak self] (location) in
-            self?.mapview.centerToLocation(location, regionRadius: 5000)
-        })
-        .disposed(by: bag)
-        
+        LocationViewModel.locationSingle
+            .subscribe(onSuccess: { [weak self] (location) in
+                self?.mapview.centerToLocation(location, regionRadius: 500)
+                }, onError: { (error) in
+                        
+            })
+            .disposed(by: bag)
     }
     
     private func setupMapView() {
-        
-        
-        
-        
+        mapview.centerToLocation(kDefaultLocation)
+        mapview.showsUserLocation = true
         mapview.delegate = self
     }
     
@@ -72,7 +74,6 @@ class MapViewController: UIViewController {
     private class SpotAnnotationView: MKMarkerAnnotationView {
         override var annotation: MKAnnotation? {
             didSet {
-                
                 var availableBikes: Int?
                 defer {
                     switch availableBikes {
@@ -121,14 +122,24 @@ private extension MKMapView {
 
 extension MapViewController: MKMapViewDelegate {
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: kAnnotationIdentifier)
         
-        if annotationView == nil {
-            annotationView = SpotAnnotationView(annotation: annotation, reuseIdentifier: kAnnotationIdentifier)
+        var annotationView: MKAnnotationView?
+        if let _ = annotation as? MKClusterAnnotation {
+            annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: kClusterIdentifier)
+            if annotationView == nil {
+                annotationView = SpotAnnotationView(annotation: annotation, reuseIdentifier: kClusterIdentifier)
+            }
+        } else if let _ = annotation as? SpotAnnotation {
+            annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: kAnnotationIdentifier)
+            if annotationView == nil {
+                annotationView = SpotAnnotationView(annotation: annotation, reuseIdentifier: kAnnotationIdentifier)
+            }
             annotationView?.clusteringIdentifier = kClusterIdentifier
         } else {
-            annotationView?.annotation = annotation
+            annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: "unknown")
         }
+            
+        annotationView?.annotation = annotation
         
         return annotationView
     }

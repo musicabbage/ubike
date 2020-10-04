@@ -25,6 +25,7 @@
 
 /* Begin PBXFileReference section */
 		6FDDD3D514E5DCD4D6F7AD59 /* Pods_ubike.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ubike.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8B0420BB2528426D003B0FE1 /* LocationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationViewModel.swift; sourceTree = "<group>"; };
 		8B4AE82C251988F30049E772 /* ubike.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ubike.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B4AE82F251988F30049E772 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8B4AE831251988F30049E772 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -99,6 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				8B4AE84925198C6B0049E772 /* UBikeViewModel.swift */,
+				8B0420BB2528426D003B0FE1 /* LocationViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -268,6 +270,7 @@
 				8B4AE84A25198C6B0049E772 /* UBikeViewModel.swift in Sources */,
 				8B4AE84625198AC90049E772 /* MapViewController.swift in Sources */,
 				8B4AE836251988F30049E772 /* DetailViewController.swift in Sources */,
+				8B0420BC2528426D003B0FE1 /* LocationViewModel.swift in Sources */,
 				8BD1E290251ED86E0040AC92 /* MainViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
