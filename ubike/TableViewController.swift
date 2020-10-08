@@ -8,17 +8,20 @@
 
 import UIKit
 import RxSwift
+import RxCocoa
 
 class TableViewController: UITableViewController {
 
     var detailViewController: DetailViewController? = nil
+    
+    private let selectStopRelay = PublishRelay<Stop?>()
+    lazy var selectStopDriver: Driver = selectStopRelay.asDriver(onErrorJustReturn: nil)
 
     private let kCellIdentifier = "spotCell"
     private let bag = DisposeBag()
     
     private var sections: [String] = [String]()
-    private var spots: [String: [Spot]]?
-    
+    private var stops: [String: [Stop]]?
     
 
     override func viewDidLoad() {
@@ -36,17 +39,16 @@ class TableViewController: UITableViewController {
 
     //MARK: private
     private func setupSubviews() {
-        tableView.register(SpotTableViewCell.self, forCellReuseIdentifier: kCellIdentifier)
-        
+        tableView.register(StopTableViewCell.self, forCellReuseIdentifier: kCellIdentifier)        
     }
     
     private func bindSubviews() {
-        UBikeViewModel.spotsDriver
+        UBikeViewModel.stopsDriver
         .do(onNext: { [weak self] (result) in
             self?.sections = Array(result.keys)
         })
         .drive(onNext: { [weak self] (result) in
-            self?.spots = result
+            self?.stops = result
             self?.tableView.reloadData()
         })
         .disposed(by: bag)
@@ -79,20 +81,24 @@ class TableViewController: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard let spots = spots?[sections[section]] else { return 0 }
+        guard let spots = stops?[sections[section]] else { return 0 }
         
         return spots.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: kCellIdentifier, for: indexPath)
-        guard let spots = spots?[sections[indexPath.section]] else { return cell }
-        guard let spotCell = cell as? SpotTableViewCell else { return cell }
+        guard let spots = stops?[sections[indexPath.section]] else { return cell }
+        guard let spotCell = cell as? StopTableViewCell else { return cell }
         
         let spot = spots[indexPath.row]
         spotCell.configure(spot)
         return spotCell
     }
 
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let spots = stops?[sections[indexPath.section]] else { return }
+        selectStopRelay.accept(spots[indexPath.row])
+    }
 }
 

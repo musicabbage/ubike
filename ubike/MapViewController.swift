@@ -28,9 +28,9 @@ class MapViewController: UIViewController {
         setupMapView()
         
         
-        UBikeViewModel.spotsDriver
+        UBikeViewModel.stopsDriver
             .map { (result) -> [MKAnnotation] in
-                result.reduce([Spot]()) { (result, spots) -> [Spot] in
+                result.reduce([Stop]()) { (result, spots) -> [Stop] in
                     return result + spots.value
                 }
                 .map { (spot) -> MKAnnotation in
@@ -61,12 +61,12 @@ class MapViewController: UIViewController {
     //MARK: annotationView
     private class SpotAnnotation: NSObject, MKAnnotation {
         var coordinate: CLLocationCoordinate2D {
-            return spot.coordinate ?? CLLocationCoordinate2DMake(0, 0)
+            return stop.coordinate ?? CLLocationCoordinate2DMake(0, 0)
         }
-        let spot: Spot
+        let stop: Stop
         
-        init(_ spot: Spot) {
-            self.spot = spot
+        init(_ stop: Stop) {
+            self.stop = stop
             super.init()
         }
     }
@@ -93,13 +93,13 @@ class MapViewController: UIViewController {
                 }
                 
                 if let spotAnnotation = annotation as? SpotAnnotation {
-                    availableBikes = spotAnnotation.spot.sbi
+                    availableBikes = spotAnnotation.stop.sbi
                     glyphText = String(availableBikes!)
                 } else if let clusterAnnotation = annotation as? MKClusterAnnotation {
                     availableBikes = clusterAnnotation.memberAnnotations
                         .reduce(0, { (result, annotation) -> Int in
                             guard let spotAnnotation = annotation as? SpotAnnotation else { return result }
-                            return result + spotAnnotation.spot.sbi
+                            return result + spotAnnotation.stop.sbi
                         })
                     glyphText = String(availableBikes!)
                 } else {

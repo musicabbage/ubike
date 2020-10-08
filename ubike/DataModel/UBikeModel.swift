@@ -25,7 +25,7 @@ struct Result<T: Decodable>: Decodable {
     }
 }
 
-struct Spot: Decodable {
+struct Stop: Decodable {
     /**
      "sno": "0404",
      "sna": "民族延平路口",
@@ -86,7 +86,7 @@ struct Spot: Decodable {
         
         sarea = try container.decode(String.self, forKey: .sarea)
         if let dayString = try container.decode(String.self, forKey: .mday) as String?,
-            let date = Spot.dateFormatter.date(from: dayString) {
+            let date = Stop.dateFormatter.date(from: dayString) {
             mday = date
         } else {
             mday = nil

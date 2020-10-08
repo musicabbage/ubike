@@ -74,8 +74,8 @@ class MainViewController: UIViewController {
     }
     
     private func bindSubviews() {
-        tableViewController.selectSpotDriver.drive(onNext: { [weak self] (spot) in
-            guard let spot = spot, let center = spot.coordinate else { return }
+        tableViewController.selectStopDriver.drive(onNext: { [weak self] (stop) in
+            guard let stop = stop, let center = stop.coordinate else { return }
             self?.mapViewController.mapview.setCenter(center, animated: true)
             if let button = self?.dismissButton, button.isSelected == false {
                 self?.dismissTable(button)

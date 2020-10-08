@@ -12,33 +12,33 @@ import RxCocoa
 
 class UBikeViewModel {
     private static let API = "https://tcgbusfs.blob.core.windows.net/blobyoubike/YouBikeTP.gz"
-    private static let allSpots = BehaviorRelay<[String: [Spot]]>(value: [:])
+    private static let allStops = BehaviorRelay<[String: [Stop]]>(value: [:])
     
-    static let spotsDriver = UBikeViewModel.allSpots.share(replay: 1, scope: .whileConnected).asDriver(onErrorJustReturn: [:])
+    static let stopsDriver = UBikeViewModel.allStops.share(replay: 1, scope: .whileConnected).asDriver(onErrorJustReturn: [:])
     
     static func fetch() {
         let url = URL(string: UBikeViewModel.API)!
         let request = URLRequest(url: url)
         _ = URLSession.shared.rx.data(request: request)
-            .map({ (data) -> [String: Spot] in
+            .map({ (data) -> [String: Stop] in
                 do {
-                    let spots = try JSONDecoder().decode(Result<[String: Spot]>.self, from: data)
-                    return spots.value
+                    let stops = try JSONDecoder().decode(Result<[String: Stop]>.self, from: data)
+                    return stops.value
                 } catch {
                     print(error)
                     throw error
                 }
             })
-            .map({ (spots) -> [String: [Spot]] in
-                let spotsArray = spots.reduce([Spot](), { (result, spotInfo) -> [Spot] in
+            .map({ (stops) -> [String: [Stop]] in
+                let stopsArray = stops.reduce([Stop](), { (result, stopInfo) -> [Stop] in
                     var result = result
-                    result.append(spotInfo.value)
+                    result.append(stopInfo.value)
                     return result
                 })
-                return Dictionary(grouping: spotsArray, by: { $0.sarea })
+                return Dictionary(grouping: stopsArray, by: { $0.sarea })
             })
-            .subscribe(onNext: { (spots) in
-                self.allSpots.accept(spots)
+            .subscribe(onNext: { (stops) in
+                self.allStops.accept(stops)
             })
     }
     
