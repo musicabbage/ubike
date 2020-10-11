@@ -8,17 +8,20 @@
 
 import UIKit
 import RxSwift
+import RxCocoa
 import MapKit
 
 class MapViewController: UIViewController {
 
     @IBOutlet weak var mapview: MKMapView!
+    let routeRelay = PublishRelay<Stop>()
     
     private let kAnnotationIdentifier = "annotation"
     private let kClusterIdentifier = "cluster"
     
     private let kDefaultLocation = CLLocation(latitude: 25.03, longitude: 121.3)
     private let locationManager = CLLocationManager()
+    
     private let bag = DisposeBag()
     
     override func viewDidLoad() {
@@ -37,10 +40,10 @@ class MapViewController: UIViewController {
                     let annotation = SpotAnnotation(spot)
                     return annotation
                 }
-        }
-        .drive(onNext: { [weak self] (annotations) in
-            self?.mapview.addAnnotations(annotations)
-        })
+            }
+            .drive(onNext: { [weak self] (annotations) in
+                self?.mapview.addAnnotations(annotations)
+            })
             .disposed(by: bag)
         
         LocationViewModel.locationSingle
@@ -50,12 +53,48 @@ class MapViewController: UIViewController {
                         
             })
             .disposed(by: bag)
+        
+        let viewModel = MapViewModel(input: (userLocation: LocationViewModel.locationSingle
+                                                .map{ $0.coordinate }
+                                                .asObservable(),
+                                             routeDestination: routeRelay
+                                                .map{ $0.coordinate }
+                                                .asObservable()))
+        bindSubviews(viewModel)
     }
     
     private func setupMapView() {
         mapview.centerToLocation(kDefaultLocation)
         mapview.showsUserLocation = true
         mapview.delegate = self
+    }
+    
+    private func bindSubviews(_ viewModel: MapViewModel) {
+        viewModel.routeDriver
+            .drive(onNext: { [weak self] (route: [MKRoute]) in
+                guard let route = route.first else { return }
+                self?.drawRoute(route)
+            })
+            .disposed(by: bag)
+    }
+    
+    //MARK: public
+    
+    //MARK: private
+    private func drawRoute(_ route: MKRoute) {
+        mapview.addOverlay(route.polyline) 
+        mapview.setVisibleMapRect(
+          mapview.visibleMapRect.union(
+            route.polyline.boundingMapRect
+          ),
+          edgePadding: UIEdgeInsets(
+            top: 0,
+            left: 8,
+            bottom: 8,
+            right: 8
+          ),
+          animated: true
+        )
     }
     
     //MARK: annotationView
@@ -146,6 +185,13 @@ extension MapViewController: MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, clusterAnnotationForMemberAnnotations memberAnnotations: [MKAnnotation]) -> MKClusterAnnotation {
         return MKClusterAnnotation(memberAnnotations: memberAnnotations)
+    }
+    
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        let renderer = MKPolylineRenderer(overlay: overlay)
+        renderer.strokeColor = .alertBackground()
+        renderer.lineWidth = 3
+        return renderer
     }
 }
 

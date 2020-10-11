@@ -19,6 +19,8 @@
 		8B4AE84625198AC90049E772 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4AE84525198AC90049E772 /* MapViewController.swift */; };
 		8B4AE84A25198C6B0049E772 /* UBikeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4AE84925198C6B0049E772 /* UBikeViewModel.swift */; };
 		8B4AE84C25198F1A0049E772 /* UBikeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B4AE84B25198F1A0049E772 /* UBikeModel.swift */; };
+		8B739174252C0633009967F1 /* RouteBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B739173252C0633009967F1 /* RouteBuilder.swift */; };
+		8B84AE462533019400110BA0 /* MapViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B84AE452533019400110BA0 /* MapViewModel.swift */; };
 		8B941AAA2529C9D50073E935 /* StopTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B941AA92529C9D50073E935 /* StopTableViewCell.swift */; };
 		8B941AAD2529D4750073E935 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B941AAC2529D4750073E935 /* Colors.swift */; };
 		8BD1E290251ED86E0040AC92 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BD1E28F251ED86E0040AC92 /* MainViewController.swift */; };
@@ -27,6 +29,7 @@
 /* Begin PBXFileReference section */
 		6FDDD3D514E5DCD4D6F7AD59 /* Pods_ubike.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ubike.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B0420BB2528426D003B0FE1 /* LocationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationViewModel.swift; sourceTree = "<group>"; };
+		8B0420BD25284C56003B0FE1 /* Taipei.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Taipei.gpx; sourceTree = "<group>"; };
 		8B4AE82C251988F30049E772 /* ubike.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ubike.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B4AE82F251988F30049E772 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8B4AE831251988F30049E772 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -39,6 +42,8 @@
 		8B4AE84525198AC90049E772 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		8B4AE84925198C6B0049E772 /* UBikeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UBikeViewModel.swift; sourceTree = "<group>"; };
 		8B4AE84B25198F1A0049E772 /* UBikeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UBikeModel.swift; sourceTree = "<group>"; };
+		8B739173252C0633009967F1 /* RouteBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RouteBuilder.swift; sourceTree = "<group>"; };
+		8B84AE452533019400110BA0 /* MapViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewModel.swift; sourceTree = "<group>"; };
 		8B941AA92529C9D50073E935 /* StopTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StopTableViewCell.swift; sourceTree = "<group>"; };
 		8B941AAC2529D4750073E935 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		8BD1E28F251ED86E0040AC92 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
@@ -93,6 +98,7 @@
 				8B4AE83A251988F40049E772 /* Assets.xcassets */,
 				8B4AE83C251988F40049E772 /* LaunchScreen.storyboard */,
 				8B4AE83F251988F40049E772 /* Info.plist */,
+				8B0420BD25284C56003B0FE1 /* Taipei.gpx */,
 			);
 			path = ubike;
 			sourceTree = "<group>";
@@ -102,6 +108,8 @@
 			children = (
 				8B4AE84925198C6B0049E772 /* UBikeViewModel.swift */,
 				8B0420BB2528426D003B0FE1 /* LocationViewModel.swift */,
+				8B739173252C0633009967F1 /* RouteBuilder.swift */,
+				8B84AE452533019400110BA0 /* MapViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -266,9 +274,11 @@
 				8B941AAD2529D4750073E935 /* Colors.swift in Sources */,
 				8B4AE832251988F30049E772 /* SceneDelegate.swift in Sources */,
 				8B4AE834251988F30049E772 /* TableViewController.swift in Sources */,
+				8B84AE462533019400110BA0 /* MapViewModel.swift in Sources */,
 				8B941AAA2529C9D50073E935 /* StopTableViewCell.swift in Sources */,
 				8B4AE84C25198F1A0049E772 /* UBikeModel.swift in Sources */,
 				8B4AE84A25198C6B0049E772 /* UBikeViewModel.swift in Sources */,
+				8B739174252C0633009967F1 /* RouteBuilder.swift in Sources */,
 				8B4AE84625198AC90049E772 /* MapViewController.swift in Sources */,
 				8B4AE836251988F30049E772 /* DetailViewController.swift in Sources */,
 				8B0420BC2528426D003B0FE1 /* LocationViewModel.swift in Sources */,

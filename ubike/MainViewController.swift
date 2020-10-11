@@ -74,14 +74,20 @@ class MainViewController: UIViewController {
     }
     
     private func bindSubviews() {
-        tableViewController.selectStopDriver.drive(onNext: { [weak self] (stop) in
-            guard let stop = stop, let center = stop.coordinate else { return }
-            self?.mapViewController.mapview.setCenter(center, animated: true)
-            if let button = self?.dismissButton, button.isSelected == false {
-                self?.dismissTable(button)
-            }
-        })
-        .disposed(by: bag)
+        tableViewController.selectStopDriver
+            .drive(onNext: { [weak self] (stop) in
+                guard let stop = stop, let center = stop.coordinate else { return }
+                self?.mapViewController.mapview.setCenter(center, animated: true)
+                if let button = self?.dismissButton, button.isSelected == false {
+                    self?.dismissTable(button)
+                }
+            })
+            .disposed(by: bag)
+        
+        tableViewController.routeStopSignal
+            .compactMap { $0 }
+            .emit(to: mapViewController.routeRelay)
+            .disposed(by: bag)
     }
  
     @objc private func dismissTable(_ sender: UIButton) {
