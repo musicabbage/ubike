@@ -17,8 +17,8 @@ class TableViewController: UITableViewController {
     private let selectStopRelay = PublishRelay<Stop?>()
     lazy var selectStopDriver = selectStopRelay.asDriver(onErrorJustReturn: nil)
     
-    private let routeStopSubject = PublishSubject<Stop?>()
-    lazy var routeStopSignal = routeStopSubject.asSignal(onErrorJustReturn: nil)
+    private let routeStopRelay = PublishRelay<Stop>()
+    lazy var routeStopSignal = routeStopRelay.asSignal()
 
     private let kCellIdentifier = "spotCell"
     private let bag = DisposeBag()
@@ -96,18 +96,19 @@ class TableViewController: UITableViewController {
         
         let stop = stops[indexPath.row]
         stopCell.configure(stop)
-        stopCell.routeSignal.map { [weak self] cell -> Stop? in
-            guard let cell = cell, let index = self?.tableView.indexPath(for: cell),
-                  index.section < self?.sections.count ?? 0 else { return nil }
-            
-            guard let section = self?.sections[index.section],
-                  let stopsInSection = self?.stops?[section],
-                  index.row < stopsInSection.count else { return nil }
-            
-            return stopsInSection[index.row]
-        }
-        .emit(to: routeStopSubject)
-        .disposed(by: bag)
+        stopCell.routeSignal
+            .compactMap({ [weak self] cell -> Stop? in
+                guard let cell = cell, let index = self?.tableView.indexPath(for: cell),
+                      index.section < self?.sections.count ?? 0 else { return nil }
+                
+                guard let section = self?.sections[index.section],
+                      let stopsInSection = self?.stops?[section],
+                      index.row < stopsInSection.count else { return nil }
+                
+                return stopsInSection[index.row]
+            })
+            .emit(to: routeStopRelay)
+            .disposed(by: bag)
         
         return stopCell
     }
