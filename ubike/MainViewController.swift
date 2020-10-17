@@ -25,7 +25,6 @@ class MainViewController: UIViewController {
     private let tableContainer = UIView()
     private let dismissButton: UIButton = {
         let button = UIButton(type: .custom)
-        button.backgroundColor = .white
         button.setTitleColor(.systemBlue, for: .normal)
         button.setTitle("↓", for: .normal)
         button.setTitle("↑", for: .selected)
@@ -36,6 +35,9 @@ class MainViewController: UIViewController {
         let tableViewController = storyboard.instantiateViewController(withIdentifier: "TableViewController") as! TableViewController
         return tableViewController
     }()
+    
+    private var detailBag: DisposeBag?
+    private var detailContainerView: UIView?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -62,6 +64,8 @@ class MainViewController: UIViewController {
         view.addSubview(tableContainer)
         addChild(tableViewController)
         tableContainer.addSubview(tableViewController.view)
+        tableContainer.backgroundColor = .white
+        tableContainer.addCornerAndShadow()
         tableViewController.didMove(toParent: self)
         tableContainer.snp.makeConstraints { (make) in
             make.left.bottom.right.equalToSuperview()
@@ -88,6 +92,78 @@ class MainViewController: UIViewController {
             .compactMap { $0 }
             .emit(to: mapViewController.routeRelay)
             .disposed(by: bag)
+        
+        mapViewController.selectStopSignal
+            .emit(onNext: { [weak self] stop in
+                self?.showStopInfo(stop)
+            })
+            .disposed(by: bag)
+        
+    }
+    
+    private func showStopInfo(_ stop: Stop) {
+        if !dismissButton.isSelected {
+            dismissTable(dismissButton)
+        }
+        
+        detailBag = DisposeBag()
+        
+        let container = UIView()
+        container.backgroundColor = .white
+        container.addCornerAndShadow()
+        view.addSubview(container)
+        container.snp.makeConstraints { (make) in
+            make.left.right.bottom.equalToSuperview()
+        }
+        detailContainerView = container
+        
+        let detailViewController = DetailViewController(stop: stop)
+        showStopViewController(detailViewController, isShow: true)
+        
+        let dismissButton = UIButton(type: .custom)
+        dismissButton.setImage(UIImage(systemName: "xmark"), for: .normal)
+        dismissButton.imageView?.tintColor = .text()
+        dismissButton.rx.controlEvent(.touchUpInside)
+            .subscribe(onNext: { [weak self] in
+                self?.detailBag = nil
+            }, onDisposed: { [weak self] in
+                self?.showStopViewController(detailViewController, isShow: false)
+            })
+            .disposed(by: detailBag!)
+        container.addSubview(dismissButton)
+        
+        dismissButton.snp.makeConstraints { (make) in
+            make.right.top.equalToSuperview()
+            make.size.equalTo(CGSize.init(width: 44, height: 36))
+        }
+        detailViewController.view.snp.makeConstraints { (make) in
+            make.bottom.equalToSuperview()
+            make.left.right.bottom.equalToSuperview()
+            make.top.equalTo(dismissButton.snp.bottom).offset(-18)
+        }
+    }
+    
+    private func showStopViewController(_ viewController: UIViewController, isShow: Bool) {
+        guard let container = detailContainerView else { return }
+        
+        if isShow {
+            container.addSubview(viewController.view)
+            viewController.didMove(toParent: self)
+            
+            container.transform = .init(translationX: 0, y: 100)
+            UIView.animate(withDuration: 0.3) {
+                container.transform = .init(translationX: 0, y: 0)
+            }
+            return
+        }
+        
+        UIView.animate(withDuration: 0.3) {
+            container.transform = .init(translationX: 0, y: 150)
+        } completion: { _ in
+            viewController.willMove(toParent: nil)
+            viewController.removeFromParent()
+            container.removeFromSuperview()
+        }
     }
  
     @objc private func dismissTable(_ sender: UIButton) {
@@ -100,5 +176,17 @@ class MainViewController: UIViewController {
             self.tableContainer.superview?.layoutIfNeeded()
         })
         sender.isSelected  = toDismiss
+    }
+}
+
+extension UIView {
+    func addCornerAndShadow() {
+        layer.shadowOffset = .zero
+        layer.shadowOpacity = 0.2
+        layer.shadowRadius = 10
+        layer.shadowColor = UIColor.black.cgColor
+        layer.masksToBounds = false
+        layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        layer.cornerRadius = 12
     }
 }

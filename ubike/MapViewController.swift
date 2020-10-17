@@ -16,6 +16,9 @@ class MapViewController: UIViewController {
     @IBOutlet weak var mapview: MKMapView!
     let routeRelay = PublishRelay<Stop>()
     
+    private let selectStopRelay = PublishRelay<Stop>()
+    lazy var selectStopSignal = selectStopRelay.asSignal()
+    
     private let kAnnotationIdentifier = "annotation"
     private let kClusterIdentifier = "cluster"
     
@@ -37,7 +40,7 @@ class MapViewController: UIViewController {
                     return result + spots.value
                 }
                 .map { (spot) -> MKAnnotation in
-                    let annotation = SpotAnnotation(spot)
+                    let annotation = StopAnnotation(spot)
                     return annotation
                 }
             }
@@ -98,7 +101,7 @@ class MapViewController: UIViewController {
     }
     
     //MARK: annotationView
-    private class SpotAnnotation: NSObject, MKAnnotation {
+    private class StopAnnotation: NSObject, MKAnnotation {
         var coordinate: CLLocationCoordinate2D {
             return stop.coordinate ?? CLLocationCoordinate2DMake(0, 0)
         }
@@ -131,13 +134,13 @@ class MapViewController: UIViewController {
                     }
                 }
                 
-                if let spotAnnotation = annotation as? SpotAnnotation {
+                if let spotAnnotation = annotation as? StopAnnotation {
                     availableBikes = spotAnnotation.stop.sbi
                     glyphText = String(availableBikes!)
                 } else if let clusterAnnotation = annotation as? MKClusterAnnotation {
                     availableBikes = clusterAnnotation.memberAnnotations
                         .reduce(0, { (result, annotation) -> Int in
-                            guard let spotAnnotation = annotation as? SpotAnnotation else { return result }
+                            guard let spotAnnotation = annotation as? StopAnnotation else { return result }
                             return result + spotAnnotation.stop.sbi
                         })
                     glyphText = String(availableBikes!)
@@ -168,7 +171,7 @@ extension MapViewController: MKMapViewDelegate {
             if annotationView == nil {
                 annotationView = SpotAnnotationView(annotation: annotation, reuseIdentifier: kClusterIdentifier)
             }
-        } else if let _ = annotation as? SpotAnnotation {
+        } else if let _ = annotation as? StopAnnotation {
             annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: kAnnotationIdentifier)
             if annotationView == nil {
                 annotationView = SpotAnnotationView(annotation: annotation, reuseIdentifier: kAnnotationIdentifier)
@@ -192,6 +195,11 @@ extension MapViewController: MKMapViewDelegate {
         renderer.strokeColor = .alertBackground()
         renderer.lineWidth = 3
         return renderer
+    }
+    
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        guard let stopAnnotation = view.annotation as? StopAnnotation else { return }
+        selectStopRelay.accept(stopAnnotation.stop)
     }
 }
 
