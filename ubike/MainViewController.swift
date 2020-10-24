@@ -12,6 +12,7 @@ import RxSwift
 
 class MainViewController: UIViewController {
     
+    private let kTableHeight = UIScreen.main.bounds.height * 0.6
     private let viewModel = UBikeViewModel()
     private let bag = DisposeBag()
     
@@ -26,8 +27,8 @@ class MainViewController: UIViewController {
     private let dismissButton: UIButton = {
         let button = UIButton(type: .custom)
         button.setTitleColor(.systemBlue, for: .normal)
-        button.setTitle("↓", for: .normal)
-        button.setTitle("↑", for: .selected)
+        button.setTitle("↓", for: .selected)
+        button.setTitle("↑", for: .normal)
         return button
     }()
     private let tableViewController: TableViewController = {
@@ -45,7 +46,36 @@ class MainViewController: UIViewController {
         setupSubViewControllers()
         bindSubviews()
         
-        UBikeViewModel.fetch()            
+        UBikeViewModel.fetch()
+        UBikeViewModel.stopsDriver
+            .asObservable()
+            .take(1)
+            .subscribe(onNext: { [weak self] _ in
+                guard let self = self else { return }
+                self.tableContainer.superview?.layoutIfNeeded()
+                self.dismissTable(self.dismissButton)
+            })
+            .disposed(by: bag)
+        
+        let refreshButton = setupNavigationBar()
+        refreshButton.sendActions(for: .touchUpInside)
+    }
+    
+    private func setupNavigationBar() -> UIButton {
+        let refreshButton = UIButton(type: .custom)
+        refreshButton.setBackgroundImage(UIImage.init(systemName: "arrow.clockwise.circle.fill"), for: .normal)
+        refreshButton.imageView?.contentMode = .scaleAspectFit
+        refreshButton.tintColor = .green()
+        refreshButton.frame = .init(origin: .zero, size: .init(width: 36, height: 34))
+        let refreshItem = UIBarButtonItem(customView: refreshButton)
+        navigationItem.rightBarButtonItem = refreshItem
+        refreshButton.rx.tap
+            .subscribe(onNext: { [weak self] in
+                UBikeViewModel.fetch()
+            })
+            .disposed(by: bag)
+        
+        return refreshButton
     }
     
     private func setupSubViewControllers() {
@@ -68,11 +98,12 @@ class MainViewController: UIViewController {
         tableContainer.addCornerAndShadow()
         tableViewController.didMove(toParent: self)
         tableContainer.snp.makeConstraints { (make) in
-            make.left.bottom.right.equalToSuperview()
-            make.height.equalToSuperview().multipliedBy(0.6)
+            make.left.right.equalToSuperview()
+            make.bottom.equalToSuperview().offset(kTableHeight)
         }
         tableViewController.view.snp.makeConstraints { (make) in
             make.top.equalTo(dismissButton.snp.bottom)
+            make.height.equalTo(kTableHeight)
             make.left.right.bottom.equalToSuperview()
         }
     }
@@ -102,7 +133,7 @@ class MainViewController: UIViewController {
     }
     
     private func showStopInfo(_ stop: Stop) {
-        if !dismissButton.isSelected {
+        if dismissButton.isSelected {
             dismissTable(dismissButton)
         }
         
@@ -167,15 +198,15 @@ class MainViewController: UIViewController {
     }
  
     @objc private func dismissTable(_ sender: UIButton) {
-        let toDismiss = !sender.isSelected
+        let toDismiss = sender.isSelected
+        sender.isSelected = !toDismiss
         
         tableContainer.snp.updateConstraints({
-            $0.bottom.equalTo(toDismiss ? tableViewController.view.frame.height : 0)
+            $0.bottom.equalToSuperview().offset(toDismiss ? kTableHeight : 0)
         })
         UIView.animate(withDuration: 0.3, animations: {
             self.tableContainer.superview?.layoutIfNeeded()
         })
-        sender.isSelected  = toDismiss
     }
 }
 

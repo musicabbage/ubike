@@ -33,30 +33,6 @@ class MapViewController: UIViewController {
         LocationViewModel.refreshCurrentLocation()
         setupMapView()
         
-        
-        UBikeViewModel.stopsDriver
-            .map { (result) -> [MKAnnotation] in
-                result.reduce([Stop]()) { (result, spots) -> [Stop] in
-                    return result + spots.value
-                }
-                .map { (spot) -> MKAnnotation in
-                    let annotation = StopAnnotation(spot)
-                    return annotation
-                }
-            }
-            .drive(onNext: { [weak self] (annotations) in
-                self?.mapview.addAnnotations(annotations)
-            })
-            .disposed(by: bag)
-        
-        LocationViewModel.locationSingle
-            .subscribe(onSuccess: { [weak self] (location) in
-                self?.mapview.centerToLocation(location, regionRadius: 500)
-                }, onError: { (error) in
-                        
-            })
-            .disposed(by: bag)
-        
         let viewModel = MapViewModel(input: (userLocation: LocationViewModel.locationSingle
                                                 .map{ $0.coordinate }
                                                 .asObservable(),
@@ -73,6 +49,34 @@ class MapViewController: UIViewController {
     }
     
     private func bindSubviews(_ viewModel: MapViewModel) {
+        
+        UBikeViewModel.stopsDriver
+            .map { (result) -> [MKAnnotation] in
+                result.reduce([Stop]()) { (result, spots) -> [Stop] in
+                    return result + spots.value
+                }
+                .map { (spot) -> MKAnnotation in
+                    let annotation = StopAnnotation(spot)
+                    return annotation
+                }
+            }
+            .do(onNext: { [weak self] _ in
+                guard let self = self else { return }
+                self.mapview.removeAnnotations(self.mapview.annotations)
+            })
+            .drive(onNext: { [weak self] (annotations) in
+                self?.mapview.addAnnotations(annotations)
+            })
+            .disposed(by: bag)
+        
+        LocationViewModel.locationSingle
+            .subscribe(onSuccess: { [weak self] (location) in
+                self?.mapview.centerToLocation(location, regionRadius: 500)
+                }, onError: { (error) in
+                        
+            })
+            .disposed(by: bag)
+        
         viewModel.routeDriver
             .drive(onNext: { [weak self] (route: [MKRoute]) in
                 guard let route = route.first else { return }
