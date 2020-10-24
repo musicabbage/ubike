@@ -19,13 +19,16 @@ class StopTableViewCell: UITableViewCell {
     //容內等間時新更料資、址地、量數位空、量數輛車前目站場、格車停總站場、稱名站場
     private let spotTitleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 18, weight: .semibold)
-        label.textColor = .darkText
+        label.font = .systemFont(ofSize: 17, weight: .semibold)
+        label.textColor = .text()
         return label
     }()
     
     private let capacityLabel: UILabel = {
-        let label = UILabel()
+        let label = InsetLabel()
+        label.insets = .init(top: 1, left: 3, bottom: 1, right: 3)
+        label.layer.cornerRadius = 3
+        label.layer.backgroundColor = UIColor.lightBackground().cgColor
         return label
     }()
     
@@ -39,7 +42,7 @@ class StopTableViewCell: UITableViewCell {
     
     private let timeLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 10)
+        label.font = .systemFont(ofSize: 10, weight: .light)
         label.textColor = .text()
         return label
     }()
@@ -54,7 +57,7 @@ class StopTableViewCell: UITableViewCell {
     }
     
     private func setupSubviews() {
-        
+        selectionStyle = .none
         let controlsContainer = UIView()
         contentView.addSubview(controlsContainer)
         controlsContainer.snp.makeConstraints { (make) in
@@ -66,23 +69,19 @@ class StopTableViewCell: UITableViewCell {
         favoriteButton.setImage(UIImage(systemName: "heart"), for: .normal)
         favoriteButton.setImage(UIImage(systemName: "heart.fill"), for: .selected)
         favoriteButton.imageView?.tintColor = .lightBackground()
-//        favoriteButton.layer.borderWidth = 1
-//        favoriteButton.layer.borderColor = UIColor.green.cgColor
         controlsContainer.addSubview(favoriteButton)
         favoriteButton.snp.makeConstraints { (make) in
-            make.top.centerX.equalToSuperview()
+            make.centerX.equalToSuperview()
             make.width.height.equalTo(30)
         }
         let routeButton = UIButton.init(type: .custom)
-        //purchased.circle.fill
-        routeButton.setImage(UIImage(systemName: "purchased.circle.fill"), for: .normal)
+        routeButton.setImage(UIImage(systemName: "arrow.up.right.diamond.fill"), for: .normal)
         routeButton.imageView?.tintColor = .lightBackground()
-//        routeButton.layer.borderWidth = 1
-//        routeButton.layer.borderColor = UIColor.green.cgColor
         controlsContainer.addSubview(routeButton)
         routeButton.snp.makeConstraints { (make) in
             make.width.height.centerX.equalTo(favoriteButton)
             make.top.equalTo(favoriteButton.snp.bottom)
+            make.bottom.equalToSuperview().offset(-5)
         }
         
         favoriteSignal = favoriteButton.rx.tap.map({ [weak self] _ -> UITableViewCell? in
@@ -107,15 +106,15 @@ class StopTableViewCell: UITableViewCell {
         contentView.addSubview(timeLabel)
         timeLabel.snp.makeConstraints { (make) in
             make.leading.greaterThanOrEqualTo(capacityLabel.snp_trailingMargin)
-            make.centerY.equalTo(capacityLabel)
+            make.top.equalTo(capacityLabel)
             make.trailing.lessThanOrEqualTo(controlsContainer.snp.leading).offset(-3)
         }
         contentView.addSubview(addressLabel)
         addressLabel.snp.makeConstraints { (make) in
             make.leading.equalTo(spotTitleLabel)
-            make.top.equalTo(capacityLabel.snp.bottom).offset(3)
+            make.top.equalTo(capacityLabel.snp.bottom).offset(7)
             make.trailing.lessThanOrEqualTo(controlsContainer.snp.leading).offset(-3)
-            make.bottomMargin.equalToSuperview()
+            make.bottomMargin.equalToSuperview().offset(-3)
         }
     }
 
@@ -131,16 +130,29 @@ class StopTableViewCell: UITableViewCell {
         spotTitleLabel.text = stop.sna
         addressLabel.text = stop.ar
         if let updateTime = stop.mday {
-            timeLabel.text = updateTime.description
+            let interval = Int((updateTime.timeIntervalSinceNow * -1).rounded(.toNearestOrAwayFromZero))
+            if interval >= 180 {
+                let min = Int((Float(interval) / 60.0).rounded(.towardZero))
+                if min > 60 {
+                    timeLabel.text = nil
+                } else {
+                    timeLabel.text = "\(min)\("min".localized()) \("last_update".localized())"
+                }
+            } else {
+                timeLabel.text = "\(interval)\("sec".localized()) \("last_update".localized())"
+            }
         }
         
-        var textAttributes: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 14, weight: .regular),
-                                                             .foregroundColor: UIColor.text()]
+        let capacityColor = UIColor.availableBikesColor(availableCount: stop.sbi)
+        var textAttributes: [NSAttributedString.Key: Any] = [.font: UIFont.systemFont(ofSize: 10, weight: .regular),
+                                                             .foregroundColor: UIColor.gray]
         let capacityAtt = NSMutableAttributedString(string: " / \(String(stop.tot))", attributes: textAttributes)
         
-        textAttributes[.foregroundColor] = UIColor.green()
+        textAttributes[.foregroundColor] = capacityColor.text
+        textAttributes[.font] = UIFont.systemFont(ofSize: 10, weight: .semibold)
         capacityAtt.insert(.init(string: String(stop.sbi), attributes: textAttributes), at: 0)        
         capacityLabel.attributedText = capacityAtt
+        capacityLabel.layer.backgroundColor = capacityColor.background.withAlphaComponent(0.65).cgColor
     }
 
     

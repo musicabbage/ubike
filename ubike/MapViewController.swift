@@ -118,20 +118,9 @@ class MapViewController: UIViewController {
             didSet {
                 var availableBikes: Int?
                 defer {
-                    switch availableBikes {
-                    case .some(0):
-                        markerTintColor = .light()
-                        glyphTintColor = .lightGray
-                    case .some(1..<10):
-                        markerTintColor = .orange()
-                        glyphTintColor = .textPurple()
-                    case .some(10...):
-                        markerTintColor = .green()
-                        glyphTintColor = .white
-                    default:
-                        markerTintColor = .alert()
-                        glyphTintColor = .white
-                    }
+                    let markerColor = UIColor.availableBikesColor(availableCount: availableBikes ?? 0)
+                    glyphTintColor = markerColor.text
+                    markerTintColor = markerColor.background
                 }
                 
                 if let spotAnnotation = annotation as? StopAnnotation {

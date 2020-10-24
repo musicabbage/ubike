@@ -49,3 +49,18 @@ extension UIColor {
         return UIColor.init(named: "textPurple")!
     }
 }
+
+extension UIColor {
+    static func availableBikesColor(availableCount: Int) -> (text: UIColor, background: UIColor) {
+        switch availableCount {
+        case 0:
+            return (.lightGray, .light())
+        case 1..<10:
+            return (.textPurple(), .orange())
+        case 10...:
+            return (.white, .green())
+        default:
+            return (.white, .alert())
+        }
+    }
+}

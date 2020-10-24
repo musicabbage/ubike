@@ -60,7 +60,7 @@ struct Stop: Decodable {
     
     private static let dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "YYYYMMDDHHMMSS" //20200922091131
+        dateFormatter.dateFormat = "YYYYMMddHHmmss" //20200922091131
         return dateFormatter
     }()
     

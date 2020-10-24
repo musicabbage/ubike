@@ -42,12 +42,15 @@ class TableViewController: UITableViewController {
 
     //MARK: private
     private func setupSubviews() {
-        tableView.register(StopTableViewCell.self, forCellReuseIdentifier: kCellIdentifier)        
+        tableView.tableFooterView = UIView()
+        tableView.register(StopTableViewCell.self, forCellReuseIdentifier: kCellIdentifier)
+        tableView.separatorInset = .init(top: 0, left: 3, bottom: 0, right: 3)
     }
     
     private func bindSubviews() {
         UBikeViewModel.stopsDriver
         .do(onNext: { [weak self] (result) in
+            guard self?.sections.count == 0 else { return }
             self?.sections = Array(result.keys)
         })
         .drive(onNext: { [weak self] (result) in
