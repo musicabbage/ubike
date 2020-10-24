@@ -137,7 +137,11 @@ class MainViewController: UIViewController {
             dismissTable(dismissButton)
         }
         
-        detailBag = DisposeBag()
+        if self.detailBag != nil {
+            self.detailBag = nil
+        }
+        
+        let detailBag = DisposeBag()
         
         let container = UIView()
         container.backgroundColor = .white
@@ -160,7 +164,7 @@ class MainViewController: UIViewController {
             }, onDisposed: { [weak self] in
                 self?.showStopViewController(detailViewController, isShow: false)
             })
-            .disposed(by: detailBag!)
+            .disposed(by: detailBag)
         container.addSubview(dismissButton)
         
         dismissButton.snp.makeConstraints { (make) in
@@ -172,6 +176,12 @@ class MainViewController: UIViewController {
             make.left.right.bottom.equalToSuperview()
             make.top.equalTo(dismissButton.snp.bottom).offset(-18)
         }
+        
+        detailViewController.navigateSignal
+            .emit(to: self.mapViewController.routeRelay)
+            .disposed(by: detailBag)
+        
+        self.detailBag = detailBag
     }
     
     private func showStopViewController(_ viewController: UIViewController, isShow: Bool) {
