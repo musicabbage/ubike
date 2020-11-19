@@ -1,4 +1,7 @@
 PODS:
+  - GradientLoadingBar (2.1.0):
+    - LightweightObservable (~> 2.1)
+  - LightweightObservable (2.1.1)
   - RxCocoa (5.1.1):
     - RxRelay (~> 5)
     - RxSwift (~> 5)
@@ -8,23 +11,28 @@ PODS:
   - SnapKit (5.0.1)
 
 DEPENDENCIES:
+  - GradientLoadingBar (~> 2.0)
   - RxCocoa (~> 5.1)
   - RxSwift (~> 5.1)
   - SnapKit (~> 5.0)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
+    - GradientLoadingBar
+    - LightweightObservable
     - RxCocoa
     - RxRelay
     - RxSwift
     - SnapKit
 
 SPEC CHECKSUMS:
+  GradientLoadingBar: 9992888de03a77c1e9364c087aefa1d9c3860ef7
+  LightweightObservable: 52abe2a01c8273921b1f66cd66526eb3328ca35a
   RxCocoa: 32065309a38d29b5b0db858819b5bf9ef038b601
   RxRelay: d77f7d771495f43c556cbc43eebd1bb54d01e8e9
   RxSwift: 81470a2074fa8780320ea5fe4102807cb7118178
   SnapKit: 97b92857e3df3a0c71833cce143274bf6ef8e5eb
 
-PODFILE CHECKSUM: ec6cd9da3b3cee4481ec8a731777d0b97300951f
+PODFILE CHECKSUM: 3e13c45a203da8296a3991861133d945770571a0
 
 COCOAPODS: 1.7.5

@@ -5,6 +5,7 @@ target 'ubike' do
     pod 'RxSwift', '~> 5.1'
     pod 'RxCocoa', '~> 5.1'
     pod 'SnapKit', '~> 5.0'
+    pod 'GradientLoadingBar', '~> 2.0'
 end
 
 # enable tracing resources
