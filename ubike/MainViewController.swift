@@ -9,6 +9,7 @@
 import UIKit
 import SnapKit
 import RxSwift
+import GradientLoadingBar
 
 class MainViewController: UIViewController {
     
@@ -21,6 +22,12 @@ class MainViewController: UIViewController {
         let storyboard = UIStoryboard(name: "Main", bundle: .main)
         let mapViewController = storyboard.instantiateViewController(withIdentifier: "MapViewController") as! MapViewController
         return mapViewController
+    }()
+    
+    private let loadingBar: GradientActivityIndicatorView = {
+        let bar = GradientActivityIndicatorView()
+        bar.gradientColors = [.green(), .green(), .green(), .light()]
+        return bar
     }()
     
     private let tableContainer = UIView()
@@ -57,25 +64,35 @@ class MainViewController: UIViewController {
             })
             .disposed(by: bag)
         
-        let refreshButton = setupNavigationBar()
-        refreshButton.sendActions(for: .touchUpInside)
+        
+        setupNavigationBar()
     }
     
-    private func setupNavigationBar() -> UIButton {
+    private func setupNavigationBar() {
         let refreshButton = UIButton(type: .custom)
-        refreshButton.setBackgroundImage(UIImage.init(systemName: "arrow.clockwise.circle.fill"), for: .normal)
+        refreshButton.setImage(UIImage.init(systemName: "arrow.clockwise.circle.fill"), for: .normal)
+        refreshButton.contentVerticalAlignment = .fill
+        refreshButton.contentHorizontalAlignment = .fill
+        refreshButton.imageEdgeInsets = .init(top: -3, left: -3, bottom: -3, right: -3)
         refreshButton.imageView?.contentMode = .scaleAspectFit
-        refreshButton.tintColor = .green()
-        refreshButton.frame = .init(origin: .zero, size: .init(width: 36, height: 34))
+        refreshButton.tintColor = .alert()
         let refreshItem = UIBarButtonItem(customView: refreshButton)
         navigationItem.rightBarButtonItem = refreshItem
         refreshButton.rx.tap
-            .subscribe(onNext: { [weak self] in
+            .subscribe(onNext: { _ in
                 UBikeViewModel.fetch()
             })
             .disposed(by: bag)
         
-        return refreshButton
+        if let navigationBar = navigationController?.navigationBar {
+            navigationBar.addSubview(loadingBar)
+            loadingBar.translatesAutoresizingMaskIntoConstraints = false
+            loadingBar.snp.makeConstraints { (make) in
+                make.left.right.equalToSuperview()
+                make.top.equalTo(navigationBar.snp.bottom)
+                make.height.equalTo(2)
+            }
+        }
     }
     
     private func setupSubViewControllers() {
