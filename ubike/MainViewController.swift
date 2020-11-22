@@ -147,6 +147,31 @@ class MainViewController: UIViewController {
             })
             .disposed(by: bag)
         
+        LocationViewModel.refreshCurrentLocation()
+        LocationViewModel.status
+            .catchError({ error -> Observable<LocationStatus> in
+                return .just(.NotAuthorized)
+            })
+            .subscribe(onNext: { [weak self] (status: LocationStatus) in
+                switch status {
+                case .Loading:
+                    self?.loadingBar.fadeIn()
+                case .Normal:
+                    self?.loadingBar.fadeOut()
+                default:
+                    self?.loadingBar.fadeOut()
+                }
+            }, onError: { [weak self] error in
+                self?.loadingBar.fadeOut()
+                let error = (error as? LocationError) ?? LocationError.unknown
+                switch error {
+                case .appDisabled, .systemDisabled:
+                    self?.showAlert(error: error)
+                default:
+                    break
+                }
+            })
+            .disposed(by: bag)
     }
     
     private func showStopInfo(_ stop: Stop) {
@@ -169,7 +194,16 @@ class MainViewController: UIViewController {
         }
         detailContainerView = container
         
-        let detailViewController = DetailViewController(stop: stop)
+        let locationSignal = LocationViewModel.status
+            .map { status -> CLLocation? in
+                guard case let .Normal(location) = status else {
+                    return nil
+                }
+                return location
+            }
+            .asSignal(onErrorJustReturn: nil)
+        
+        let detailViewController = DetailViewController(input: (locationSignal, stop))
         showStopViewController(detailViewController, isShow: true)
         
         let dismissButton = UIButton(type: .custom)
@@ -234,6 +268,26 @@ class MainViewController: UIViewController {
         UIView.animate(withDuration: 0.3, animations: {
             self.tableContainer.superview?.layoutIfNeeded()
         })
+    }
+}
+
+//MARK: - location alert
+extension MainViewController {
+    func showAlert(error: LocationError) {
+        
+        let checkAuth = (error == .appDisabled)
+        let message = checkAuth ? "need_location_authorization".localized() : "get_location_failed".localized()
+        
+        let alert = UIAlertController(title: "notice".localized(),
+                                      message: message,
+                                      preferredStyle: .alert)
+        alert.addAction(.init(title: "confirm".localized(), style: .cancel, handler: nil))
+        if checkAuth {
+            alert.addAction(.init(title: "go_setting".localized(), style: .default, handler: { _ in
+                UIApplication.shared.open(URL(string: UIApplication.openSettingsURLString)!)
+            }))
+        }
+        present(alert, animated: true, completion: nil)
     }
 }
 

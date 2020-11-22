@@ -16,6 +16,8 @@ class StopTableViewCell: UITableViewCell {
     var favoriteSignal: Signal<UITableViewCell?>!
     var routeSignal: Signal<UITableViewCell?>!
     
+    private let bag = DisposeBag()
+    
     //容內等間時新更料資、址地、量數位空、量數輛車前目站場、格車停總站場、稱名站場
     private let spotTitleLabel: UILabel = {
         let label = UILabel()
@@ -76,7 +78,18 @@ class StopTableViewCell: UITableViewCell {
         }
         let routeButton = UIButton.init(type: .custom)
         routeButton.setImage(UIImage(systemName: "arrow.up.right.diamond.fill"), for: .normal)
-        routeButton.imageView?.tintColor = .lightBackground()
+        updateRouteButton(routeButton, enabled: false)
+        LocationViewModel.status
+            .map({ status -> Bool in
+                guard case .Normal(_) = status else { return false }
+                return true
+            })
+            .asDriver(onErrorJustReturn: false)
+            .drive(onNext: { [weak self, weak routeButton] enable in
+                guard let button = routeButton else { return }
+                self?.updateRouteButton(button, enabled: enable)
+            })
+            .disposed(by: bag)
         controlsContainer.addSubview(routeButton)
         routeButton.snp.makeConstraints { (make) in
             make.width.height.centerX.equalTo(favoriteButton)
@@ -155,5 +168,13 @@ class StopTableViewCell: UITableViewCell {
         capacityLabel.layer.backgroundColor = capacityColor.background.withAlphaComponent(0.65).cgColor
     }
 
-    
+    private func updateRouteButton(_ button: UIButton, enabled: Bool) {
+        button.isEnabled = enabled
+        if enabled {
+            button.imageView?.tintColor = .lightBackground()
+            return
+        }
+        
+        button.imageView?.tintColor = .lightGray
+    }
 }

@@ -8,16 +8,23 @@
 
 import Foundation
 import RxSwift
+import RxCocoa
 import MapKit
 
 enum LocationError: Error {
-    case systemDisabled, appDisabled, locationError
+    case systemDisabled, appDisabled, locationError, unknown
+}
+
+enum LocationStatus: Equatable {
+    case NotAuthorized
+    case Loading
+    case Normal(CLLocation)
+    case Error(LocationError)
 }
 
 struct LocationViewModel {
     private static let locationDelegate = LocationDelegate()
     
-    fileprivate static let locationSubject = PublishSubject<CLLocation>()
     fileprivate static let locationManager: CLLocationManager = {
         let locationManager = CLLocationManager()
         locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters
@@ -25,15 +32,31 @@ struct LocationViewModel {
         return locationManager
     }()
     
-    static let locationSingle = locationSubject.asSingle()
+    static let status = statusSubject.observeOn(MainScheduler.instance)
+    fileprivate static let statusSubject = PublishRelay<LocationStatus>()
     
     static func refreshCurrentLocation() {
+        
         guard CLLocationManager.locationServicesEnabled() else {
-            locationSubject.onError(LocationError.systemDisabled)
-          return
+            //系統層關閉
+            statusSubject.accept(.Error(.systemDisabled))
+            return
         }
         
-        requestLocationAuthorization(CLLocationManager.authorizationStatus())
+        let authStatus = CLLocationManager.authorizationStatus()
+        switch authStatus {
+        case .notDetermined:
+            //未授權
+            statusSubject.accept(.NotAuthorized)
+        case .denied, .restricted:
+            //拒絕
+            statusSubject.accept(.Error(.appDisabled))
+        case .authorizedAlways, .authorizedWhenInUse:
+            //更新位置
+            requestLocationAuthorization(CLLocationManager.authorizationStatus())
+        default:
+            statusSubject.accept(.Error(.unknown))
+        }
     }
     
     fileprivate static func requestLocationAuthorization(_ status: CLAuthorizationStatus) {
@@ -41,6 +64,7 @@ struct LocationViewModel {
         case .notDetermined:
             locationManager.requestWhenInUseAuthorization()
         default:
+            statusSubject.accept(.Loading)
             locationManager.requestLocation()
         }
     }
@@ -52,22 +76,21 @@ extension LocationDelegate: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch status {
         case .restricted, .denied:
-            LocationViewModel.locationSubject.onError(LocationError.appDisabled)
+            LocationViewModel.statusSubject.accept(.Error(.appDisabled))
         default:
             LocationViewModel.requestLocationAuthorization(status)
         }
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        LocationViewModel.locationSubject.onError(error)
+        LocationViewModel.statusSubject.accept(.Error(.locationError))
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else {
-            LocationViewModel.locationSubject.onError(LocationError.locationError)
+            LocationViewModel.statusSubject.accept(.Error(.locationError))
             return
         }
-        LocationViewModel.locationSubject.onNext(location)
-        LocationViewModel.locationSubject.onCompleted()
+        LocationViewModel.statusSubject.accept(.Normal(location))
     }
 }

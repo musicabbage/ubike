@@ -8,8 +8,18 @@
 
 import UIKit
 import SnapKit
+import MapKit
+import RxCocoa
+import RxSwift
 
 class DetailViewController: UIViewController {
+    
+    lazy var navigateSignal = navigateRelay.asSignal()
+    private let navigateRelay = PublishRelay<Stop>()
+    
+    private let locationSignal: Observable<CLLocation?>
+    
+    private let bag = DisposeBag()
 
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -36,12 +46,9 @@ class DetailViewController: UIViewController {
         let button = UIButton()
         button.layer.cornerRadius = 10
         button.layer.masksToBounds = true
-        button.backgroundColor = .green()
         button.setImage(UIImage(systemName: "arrow.up.right.diamond.fill"), for: .normal)
         button.setTitle(NSLocalizedString("navigation", comment: ""), for: .normal)
-        button.imageView?.tintColor = .text()
         button.titleLabel?.font = .systemFont(ofSize: 14, weight: .medium)
-        button.setTitleColor(.text(), for: .normal)
         button.titleEdgeInsets = .init(top: 0, left: 5, bottom: 0, right: 0)
         button.contentEdgeInsets = .init(top: 5, left: 0, bottom: 5, right: 0)
         return button
@@ -57,10 +64,13 @@ class DetailViewController: UIViewController {
         return button
     }()
     
+    private var userLocation: CLLocation? = nil
     private let stop: Stop
     
-    init(stop: Stop) {
-        self.stop = stop
+    init(input: (locationSignal: Signal<CLLocation?>, stop: Stop)) {
+        stop = input.stop
+        locationSignal = input.locationSignal.asObservable()
+        
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -75,6 +85,7 @@ class DetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupSubviews()
+        bindSubviews()
     }
 
     //MARK: private
@@ -130,9 +141,37 @@ class DetailViewController: UIViewController {
         }
         
         setupConstraints()
+        updateNavigationButton(enabled: userLocation != nil)
         configure(stop: stop)
     }
     
+    private func bindSubviews() {
+        navigationButton.rx.tap
+            .map({ [unowned self] in
+                return self.stop
+            })
+            .bind(to: self.navigateRelay)
+            .disposed(by: bag)
+        
+        locationSignal
+            .bind(onNext: { [weak self] location in
+                self?.userLocation = location
+                self?.navigationButton.isEnabled = (location != nil)
+            })
+            .disposed(by: bag)
+    }
     
+    private func updateNavigationButton(enabled: Bool) {
+        navigationButton.isEnabled = enabled
+        if enabled {
+            navigationButton.backgroundColor = .green()
+            navigationButton.imageView?.tintColor = .text()
+            navigationButton.setTitleColor(.text(), for: .normal)
+        } else {
+            navigationButton.backgroundColor = .lightGray
+            navigationButton.imageView?.tintColor = .gray
+            navigationButton.setTitleColor(.gray, for: .normal)
+        }
+    }
 }
 

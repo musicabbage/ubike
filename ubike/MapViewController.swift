@@ -25,20 +25,29 @@ class MapViewController: UIViewController {
     private let kDefaultLocation = CLLocation(latitude: 25.03, longitude: 121.3)
     private let locationManager = CLLocationManager()
     
+    private var viewModel: MapViewModel!
     private let bag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        LocationViewModel.refreshCurrentLocation()
         setupMapView()
         
-        let viewModel = MapViewModel(input: (userLocation: LocationViewModel.locationSingle
-                                                .map{ $0.coordinate }
-                                                .asObservable(),
-                                             routeDestination: routeRelay
-                                                .map{ $0.coordinate }
-                                                .asObservable()))
+        let location = LocationViewModel.status
+            .distinctUntilChanged()
+            .map({ locationStatus -> CLLocationCoordinate2D? in
+                guard case let .Normal(location) = locationStatus else {
+                    return nil
+                }
+                return location.coordinate
+            })
+        
+        let route = routeRelay
+            .map{ $0.coordinate }
+            .asObservable()
+        
+        viewModel = MapViewModel(input: (userLocation: location,
+                                         routeDestination: route))
         bindSubviews(viewModel)
     }
     
@@ -69,23 +78,25 @@ class MapViewController: UIViewController {
             })
             .disposed(by: bag)
         
-        LocationViewModel.locationSingle
-            .subscribe(onSuccess: { [weak self] (location) in
-                self?.mapview.centerToLocation(location, regionRadius: 500)
-                }, onError: { (error) in
-                        
-            })
-            .disposed(by: bag)
-        
         viewModel.routeDriver
             .drive(onNext: { [weak self] (route: [MKRoute]) in
                 guard let route = route.first else { return }
                 self?.drawRoute(route)
             })
             .disposed(by: bag)
+        
+        viewModel.mapCenterDriver
+            .drive(onNext: { [weak self] coordinate in
+                self?.mapview.centerToLocation(CLLocation(latitude: coordinate.latitude,
+                                                          longitude: coordinate.longitude))
+            })
+            .disposed(by: bag)
     }
     
     //MARK: public
+    func focus(location: CLLocation) {
+        mapview.centerToLocation(location, regionRadius: 500)
+    }
     
     //MARK: private
     private func drawRoute(_ route: MKRoute) {

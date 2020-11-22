@@ -9,3 +9,10 @@
 "last_update" = "前更新";
 "sec" = "秒";
 "min" = "分鐘";
+
+"notice" = "提示";
+"confirm" = "確認";
+"go_setting" = "前往設定";
+
+"need_location_authorization" = "需要開啟位置權限📍才能開啟導航功能哦";
+"get_location_failed" = "目前無法取得你的位置😵暫時無法使用導航功能";
