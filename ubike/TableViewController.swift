@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MapKit
 import RxSwift
 import RxCocoa
 
@@ -19,6 +20,8 @@ class TableViewController: UITableViewController {
     
     private let routeStopRelay = PublishRelay<Stop>()
     lazy var routeStopSignal = routeStopRelay.asSignal()
+    
+    private let locationRelay = BehaviorRelay<CLLocation?>(value: nil)
 
     private let kCellIdentifier = "spotCell"
     private let bag = DisposeBag()
@@ -26,10 +29,21 @@ class TableViewController: UITableViewController {
     private var sections: [String] = [String]()
     private var stops: [String: [Stop]]?
     
-
+    init(input:(Signal<CLLocation?>)) {
+        
+        super.init(nibName: nil, bundle: nil)
+        input
+            .compactMap { $0 }
+            .emit(to: locationRelay)
+            .disposed(by: bag)
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
 
         setupSubviews()
         bindSubviews()
@@ -78,6 +92,13 @@ class TableViewController: UITableViewController {
 //                detailViewController = controller
 //            }
         }
+        
+        locationRelay
+            .asDriver()
+            .drive(onNext: { [weak self] location in
+                self?.tableView.reloadData()
+            })
+            .disposed(by: bag)
     }
 
     // MARK: - Table View
@@ -98,7 +119,7 @@ class TableViewController: UITableViewController {
         guard let stopCell = cell as? StopTableViewCell else { return cell }
         
         let stop = stops[indexPath.row]
-        stopCell.configure(stop)
+        stopCell.configure(stop, enableRoute: locationRelay.value != nil)
         stopCell.routeSignal
             .compactMap({ [weak self] cell -> Stop? in
                 guard let cell = cell, let index = self?.tableView.indexPath(for: cell),

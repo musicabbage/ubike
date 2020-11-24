@@ -33,7 +33,7 @@ struct LocationViewModel {
     }()
     
     static let status = statusSubject.observeOn(MainScheduler.instance)
-    fileprivate static let statusSubject = PublishRelay<LocationStatus>()
+    fileprivate static let statusSubject = BehaviorRelay<LocationStatus>(value: .NotAuthorized)
     
     static func refreshCurrentLocation() {
         

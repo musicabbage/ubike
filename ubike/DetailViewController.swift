@@ -17,7 +17,7 @@ class DetailViewController: UIViewController {
     lazy var navigateSignal = navigateRelay.asSignal()
     private let navigateRelay = PublishRelay<Stop>()
     
-    private let locationSignal: Observable<CLLocation?>
+    private let locationDriver: Driver<CLLocation?>
     
     private let bag = DisposeBag()
 
@@ -69,7 +69,7 @@ class DetailViewController: UIViewController {
     
     init(input: (locationSignal: Signal<CLLocation?>, stop: Stop)) {
         stop = input.stop
-        locationSignal = input.locationSignal.asObservable()
+        locationDriver = input.locationSignal.asDriver(onErrorJustReturn: nil)
         
         super.init(nibName: nil, bundle: nil)
     }
@@ -153,10 +153,10 @@ class DetailViewController: UIViewController {
             .bind(to: self.navigateRelay)
             .disposed(by: bag)
         
-        locationSignal
-            .bind(onNext: { [weak self] location in
+        locationDriver
+            .drive(onNext: { [weak self] location in
                 self?.userLocation = location
-                self?.navigationButton.isEnabled = (location != nil)
+                self?.updateNavigationButton(enabled: location != nil)
             })
             .disposed(by: bag)
     }

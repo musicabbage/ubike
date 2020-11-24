@@ -50,6 +50,12 @@ class StopTableViewCell: UITableViewCell {
         return label
     }()
     
+    private let routeButton: UIButton = {
+        let button = UIButton.init(type: .custom)
+        button.setImage(UIImage(systemName: "arrow.up.right.diamond.fill"), for: .normal)
+        return button
+    }()
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupSubviews()
@@ -68,7 +74,6 @@ class StopTableViewCell: UITableViewCell {
             make.width.equalTo(75)
         }
         let favoriteButton = UIButton.init(type: .custom)
-        //favorite/favorite_border
         favoriteButton.setImage(UIImage(systemName: "heart"), for: .normal)
         favoriteButton.setImage(UIImage(systemName: "heart.fill"), for: .selected)
         favoriteButton.imageView?.tintColor = .lightBackground()
@@ -77,20 +82,9 @@ class StopTableViewCell: UITableViewCell {
             make.centerX.equalToSuperview()
             make.width.height.equalTo(30)
         }
-        let routeButton = UIButton.init(type: .custom)
-        routeButton.setImage(UIImage(systemName: "arrow.up.right.diamond.fill"), for: .normal)
+        
         updateRouteButton(routeButton, enabled: false)
-        LocationViewModel.status
-            .map({ status -> Bool in
-                guard case .Normal(_) = status else { return false }
-                return true
-            })
-            .asDriver(onErrorJustReturn: false)
-            .drive(onNext: { [weak self, weak routeButton] enable in
-                guard let button = routeButton else { return }
-                self?.updateRouteButton(button, enabled: enable)
-            })
-            .disposed(by: bag)
+        
         controlsContainer.addSubview(routeButton)
         routeButton.snp.makeConstraints { (make) in
             make.width.height.centerX.equalTo(favoriteButton)
@@ -142,7 +136,8 @@ class StopTableViewCell: UITableViewCell {
         reuseBag = DisposeBag()
     }
     
-    func configure(_ stop: Stop) {
+    func configure(_ stop: Stop, enableRoute isEnable: Bool) {
+        updateRouteButton(routeButton, enabled: isEnable)
         spotTitleLabel.text = stop.sna
         addressLabel.text = stop.ar
         if let updateTime = stop.mday {

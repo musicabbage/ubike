@@ -9,6 +9,7 @@
 import UIKit
 import SnapKit
 import RxSwift
+import MapKit
 import GradientLoadingBar
 
 class MainViewController: UIViewController {
@@ -38,9 +39,17 @@ class MainViewController: UIViewController {
         button.setTitle("↑", for: .normal)
         return button
     }()
+    
     private let tableViewController: TableViewController = {
-        let storyboard = UIStoryboard(name: "Main", bundle: .main)
-        let tableViewController = storyboard.instantiateViewController(withIdentifier: "TableViewController") as! TableViewController
+        let locationSignal = LocationViewModel.status
+            .compactMap({ status -> CLLocation? in
+                guard case let .Normal(location) = status else {
+                    return nil
+                }
+                return location
+            })
+            .asSignal(onErrorJustReturn: nil)
+        let tableViewController = TableViewController(input: locationSignal)
         return tableViewController
     }()
     
@@ -64,7 +73,6 @@ class MainViewController: UIViewController {
             })
             .disposed(by: bag)
         
-        
         setupNavigationBar()
     }
     
@@ -81,6 +89,21 @@ class MainViewController: UIViewController {
         refreshButton.rx.tap
             .subscribe(onNext: { _ in
                 UBikeViewModel.fetch()
+            })
+            .disposed(by: bag)
+        
+        let locationButton = UIButton(type: .custom)
+        locationButton.setImage(UIImage.init(systemName: "location.fill"), for: .normal)
+        locationButton.contentVerticalAlignment = .fill
+        locationButton.contentHorizontalAlignment = .fill
+        locationButton.imageEdgeInsets = .init(top: -3, left: -3, bottom: -3, right: -3)
+        locationButton.imageView?.contentMode = .scaleAspectFit
+        locationButton.tintColor = .alert()
+        let locationItem = UIBarButtonItem(customView: locationButton)
+        navigationItem.leftBarButtonItem = locationItem
+        locationButton.rx.tap
+            .subscribe(onNext: {
+                LocationViewModel.refreshCurrentLocation()
             })
             .disposed(by: bag)
         
@@ -137,7 +160,6 @@ class MainViewController: UIViewController {
             .disposed(by: bag)
         
         tableViewController.routeStopSignal
-            .compactMap { $0 }
             .emit(to: mapViewController.routeRelay)
             .disposed(by: bag)
         

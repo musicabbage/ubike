@@ -28,6 +28,7 @@ class MapViewModel {
         let userLocation = input.userLocation.asSignal(onErrorRecover: { error -> Signal<CLLocationCoordinate2D?> in
             return Signal<CLLocationCoordinate2D?>.of(nil)
         })
+        .compactMap { $0 }
         .asObservable()
         
         routeDriver = Observable.combineLatest(userLocation, input.routeDestination)
