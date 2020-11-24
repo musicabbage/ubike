@@ -16,6 +16,7 @@ class StopTableViewCell: UITableViewCell {
     var favoriteSignal: Signal<UITableViewCell?>!
     var routeSignal: Signal<UITableViewCell?>!
     
+    var reuseBag = DisposeBag()
     private let bag = DisposeBag()
     
     //容內等間時新更料資、址地、量數位空、量數輛車前目站場、格車停總站場、稱名站場
@@ -137,6 +138,8 @@ class StopTableViewCell: UITableViewCell {
         capacityLabel.text = nil
         addressLabel.text = nil
         timeLabel.text = nil
+        
+        reuseBag = DisposeBag()
     }
     
     func configure(_ stop: Stop) {

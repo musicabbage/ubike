@@ -111,7 +111,7 @@ class TableViewController: UITableViewController {
                 return stopsInSection[index.row]
             })
             .emit(to: routeStopRelay)
-            .disposed(by: bag)
+            .disposed(by: stopCell.reuseBag)
         
         return stopCell
     }
