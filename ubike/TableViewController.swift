@@ -12,8 +12,6 @@ import RxSwift
 import RxCocoa
 
 class TableViewController: UITableViewController {
-
-    var detailViewController: DetailViewController? = nil
     
     private let selectStopRelay = PublishRelay<Stop?>()
     lazy var selectStopDriver = selectStopRelay.asDriver(onErrorJustReturn: nil)
@@ -63,35 +61,15 @@ class TableViewController: UITableViewController {
     
     private func bindSubviews() {
         UBikeViewModel.stopsDriver
-        .do(onNext: { [weak self] (result) in
-            guard self?.sections.count == 0 else { return }
-            self?.sections = Array(result.keys)
-        })
-        .drive(onNext: { [weak self] (result) in
-            self?.stops = result
-            self?.tableView.reloadData()
-        })
-        .disposed(by: bag)
-    }
-//    func refresh(spots: [String : [Spot]]) {
-//        sections = Array(spots.keys)
-//        self.spots = spots
-//        tableView.reloadData()
-//    }
-
-    // MARK: - Segues
-
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "showDetail" {
-//            if let indexPath = tableView.indexPathForSelectedRow {
-//                let object = objects[indexPath.row] as! NSDate
-//                let controller = (segue.destination as! UINavigationController).topViewController as! DetailViewController
-//                controller.detailItem = object
-//                controller.navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
-//                controller.navigationItem.leftItemsSupplementBackButton = true
-//                detailViewController = controller
-//            }
-        }
+            .do(onNext: { [weak self] (result) in
+                guard self?.sections.count == 0 else { return }
+                self?.sections = Array(result.keys)
+            })
+            .drive(onNext: { [weak self] (result) in
+                self?.stops = result
+                self?.tableView.reloadData()
+            })
+            .disposed(by: bag)
         
         locationRelay
             .asDriver()
