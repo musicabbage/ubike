@@ -81,6 +81,9 @@ class MapViewController: UIViewController {
         viewModel.routeDriver
             .drive(onNext: { [weak self] (route: [MKRoute]) in
                 guard let route = route.first else { return }
+                if let currentRouteOverlays = self?.mapview.overlays {
+                    self?.mapview.removeOverlays(currentRouteOverlays)
+                }
                 self?.drawRoute(route)
             })
             .disposed(by: bag)
