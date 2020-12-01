@@ -54,6 +54,7 @@ class TableViewController: UITableViewController {
 
     //MARK: private
     private func setupSubviews() {
+        tableView.backgroundColor = .clear
         tableView.tableFooterView = UIView()
         tableView.register(StopTableViewCell.self, forCellReuseIdentifier: kCellIdentifier)
         tableView.separatorInset = .init(top: 0, left: 3, bottom: 0, right: 3)

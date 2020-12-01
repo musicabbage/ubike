@@ -34,9 +34,9 @@ class MainViewController: UIViewController {
     private let tableContainer = UIView()
     private let dismissButton: UIButton = {
         let button = UIButton(type: .custom)
-        button.setTitleColor(.systemBlue, for: .normal)
-        button.setTitle("↓", for: .selected)
-        button.setTitle("↑", for: .normal)
+        button.tintColor = .orange()
+        button.setImage(UIImage(systemName: "chevron.compact.up"), for: .normal)
+        button.setImage(UIImage(systemName: "chevron.compact.down"), for: .selected)
         return button
     }()
     
@@ -77,13 +77,16 @@ class MainViewController: UIViewController {
     }
     
     private func setupNavigationBar() {
+        
+        navigationController?.navigationBar.barTintColor = .orange()
+        
         let refreshButton = UIButton(type: .custom)
         refreshButton.setImage(UIImage.init(systemName: "arrow.clockwise.circle.fill"), for: .normal)
         refreshButton.contentVerticalAlignment = .fill
         refreshButton.contentHorizontalAlignment = .fill
         refreshButton.imageEdgeInsets = .init(top: -3, left: -3, bottom: -3, right: -3)
         refreshButton.imageView?.contentMode = .scaleAspectFit
-        refreshButton.tintColor = .alert()
+        refreshButton.tintColor = .light()
         let refreshItem = UIBarButtonItem(customView: refreshButton)
         navigationItem.rightBarButtonItem = refreshItem
         refreshButton.rx.tap
@@ -98,7 +101,7 @@ class MainViewController: UIViewController {
         locationButton.contentHorizontalAlignment = .fill
         locationButton.imageEdgeInsets = .init(top: -3, left: -3, bottom: -3, right: -3)
         locationButton.imageView?.contentMode = .scaleAspectFit
-        locationButton.tintColor = .alert()
+        locationButton.tintColor = .light()
         let locationItem = UIBarButtonItem(customView: locationButton)
         navigationItem.leftBarButtonItem = locationItem
         locationButton.rx.tap
@@ -134,8 +137,7 @@ class MainViewController: UIViewController {
         view.addSubview(tableContainer)
         addChild(tableViewController)
         tableContainer.addSubview(tableViewController.view)
-        tableContainer.backgroundColor = .white
-        tableContainer.addCornerAndShadow()
+        tableContainer.backgroundColor = .clear
         tableViewController.didMove(toParent: self)
         tableContainer.snp.makeConstraints { (make) in
             make.left.right.equalToSuperview()
@@ -146,6 +148,16 @@ class MainViewController: UIViewController {
             make.height.equalTo(kTableHeight)
             make.left.right.bottom.equalToSuperview()
         }
+        let gradientLayer = CAGradientLayer()
+        let startColor = UIColor(red: 255.0/256.0, green: 252.0/256.0, blue: 247.0/256.0, alpha: 1)
+        gradientLayer.colors = [startColor.cgColor, UIColor.white.cgColor]
+        gradientLayer.startPoint = CGPoint(x: 0.5, y: 1)
+        gradientLayer.endPoint = CGPoint(x: 0.5, y: 0.3)
+        var frame = UIScreen.main.bounds
+        frame.size.height = kTableHeight + 44
+        gradientLayer.frame = frame
+        gradientLayer.addCornerAndShadow()
+        tableContainer.layer.insertSublayer(gradientLayer, at: 0)
     }
     
     private func bindSubviews() {
@@ -209,7 +221,7 @@ class MainViewController: UIViewController {
         
         let container = UIView()
         container.backgroundColor = .white
-        container.addCornerAndShadow()
+        container.layer.addCornerAndShadow()
         view.addSubview(container)
         container.snp.makeConstraints { (make) in
             make.left.right.bottom.equalToSuperview()
@@ -313,14 +325,14 @@ extension MainViewController {
     }
 }
 
-extension UIView {
+extension CALayer {
     func addCornerAndShadow() {
-        layer.shadowOffset = .zero
-        layer.shadowOpacity = 0.2
-        layer.shadowRadius = 10
-        layer.shadowColor = UIColor.black.cgColor
-        layer.masksToBounds = false
-        layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        layer.cornerRadius = 12
+        shadowOffset = .zero
+        shadowOpacity = 0.2
+        shadowRadius = 10
+        shadowColor = UIColor.black.cgColor
+        masksToBounds = false
+        maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        cornerRadius = 12
     }
 }

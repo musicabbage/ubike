@@ -66,6 +66,7 @@ class StopTableViewCell: UITableViewCell {
     }
     
     private func setupSubviews() {
+        backgroundColor = .clear
         selectionStyle = .none
         let controlsContainer = UIView()
         contentView.addSubview(controlsContainer)
